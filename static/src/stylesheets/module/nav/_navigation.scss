@@ -158,7 +158,6 @@ $c-navigation-expandable-background: colour(neutral-1);
     }
 }
 .top-navigation {
-    position: relative;
     background: $c-top-header-background;
 }
 .navigation__container--first {
@@ -259,21 +258,15 @@ $c-navigation-expandable-background: colour(neutral-1);
 .local-navigation__action,
 .top-navigation__action,
 .global-navigation__action {
-    position: relative;
-
-    &:after {
-        content: '';
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        right: -$gs-gutter/4;
-        left: -$gs-gutter/4;
-    }
+    display: block;
+    height: 100%;
 }
 .local-navigation__action,
 .top-navigation__action {
     color: $c-local-navigation-action;
     z-index: 3; /* ensure it is higher than any overlapping cutout contributor image */
+    padding-right: $navigation-h-space-between-items/2;
+    padding-left: $navigation-h-space-between-items/2;
 }
 .top-navigation__action {
     color: $c-top-navigation-action;
@@ -303,9 +296,6 @@ $c-navigation-expandable-background: colour(neutral-1);
 .local-navigation__item,
 .top-navigation__item {
     display: table-cell;
-    position: relative;
-    padding-right: $navigation-h-space-between-items/2;
-    padding-left: $navigation-h-space-between-items/2;
 
     @include mq(navigationBreakOnTwoLevels, navigationBreakOnTwoLevelsWithWideToggle) {
         @include navigation-items-shrink-spacing;
@@ -346,7 +336,6 @@ $c-navigation-expandable-background: colour(neutral-1);
     }
 }
 .top-navigation__icon-wrapper {
-    position: relative;
     display: inline-block;
     top: 3px;
 }
@@ -836,7 +825,7 @@ $c-navigation-expandable-background: colour(neutral-1);
 
     .burger-icon {
         margin-top: $gs-baseline * 1.5;
-        
+
         @include mq($until: mobileLandscape) {
             margin: $gs-baseline * 1.5 0 0;
         }
