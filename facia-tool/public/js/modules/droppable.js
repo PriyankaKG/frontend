@@ -3,11 +3,13 @@ import _ from 'underscore';
 import copiedArticle from 'modules/copied-article';
 import alert from 'utils/alert';
 import * as draggableElement from 'utils/draggable-element';
+import dispatch from 'utils/drag-dispatcher';
+import mediator from 'utils/mediator';
 
 function getTargetItem (target, context) {
     context = context || ko.contextFor(target);
     var data = context.$data || {};
-    if (!data.drop && context.$parentContext) {
+    if (!data.dropTarget && context.$parentContext) {
         return getTargetItem(null, context.$parentContext);
     } else {
         return data;
@@ -50,6 +52,7 @@ var listeners = {
             return;
         }
 
+
         try {
             source = draggableElement.getItem(event.dataTransfer, sourceGroup);
         } catch (ex) {
@@ -64,7 +67,7 @@ var listeners = {
         copiedArticle.flush();
 
         targetGroup.unsetAsTarget();
-        targetItem.drop(source, targetGroup, !!event.ctrlKey);
+        dispatch(source, targetItem, targetGroup, !!event.ctrlKey);
      }
 };
 
@@ -81,24 +84,28 @@ function preventDefaultAction (event) {
 function init() {
     window.addEventListener('dragover', preventDefaultAction, false);
     window.addEventListener('drop', preventDefaultAction, false);
+    mediator.on('drop', (...args) => {
+        dispatch(...args);
+    });
 
     ko.bindingHandlers.makeDroppable = {
-        init: function(element) {
+        init: function (element) {
             for (var eventName in listeners) {
                 element.addEventListener(eventName, getListener(eventName, element), false);
              }
         }
     };
     ko.bindingHandlers.makeDraggable = {
-        init: function(element) {
+        init: function (element) {
             element.addEventListener('dragstart', getListener('dragstart', element), false);
         }
-     };
+    };
 }
 
 function dispose() {
     window.removeEventListener('dragover', preventDefaultAction);
     window.removeEventListener('drop', preventDefaultAction);
+    mediator.off('drop');
 }
 
 export {

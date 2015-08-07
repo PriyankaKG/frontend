@@ -1481,10 +1481,6 @@ button {
     border-left: 1px solid #cfd8dc;
 }
 
-.top-button-collections {
-    display: none;
-}
-
 .top-button a {
     color: #999999;
     padding: 15px 20px 0;

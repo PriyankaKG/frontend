@@ -1,4 +1,4 @@
-@(title: String, env: String, priority: Option[String] = None, identity: Option[com.gu.pandomainauth.model.User] = None, model: Option[String] = None)(content: Html)
+@(title: String, env: String, priority: Option[String] = None, identity: Option[com.gu.pandomainauth.model.User] = None)(content: Html)
 
 @import conf.Configuration
 
@@ -22,47 +22,24 @@
         <meta name="msapplication-TileColor" content="#005689" />
         <meta name="msapplication-TileImage" content="@controllers.faciatool.routes.UncachedAssets.at("images/windows_tile_144_b.png")" />
 
-        <link href="@controllers.faciatool.routes.UncachedAssets.at("css/style.css?v2")" rel="stylesheet">
+        <link href="@controllers.faciatool.routes.UncachedAssets.at("css/style.css")" rel="stylesheet">
 
         <script src="@controllers.faciatool.routes.UncachedAssets.at("jspm_packages/system.js")"></script>
         <script src="@controllers.faciatool.routes.UncachedAssets.at("js/jspm-config.js")"></script>
 
-        @model match {
-            case Some("collections") => {
-                <script>System.import('models/collections/loader');</script>
-            }
-            case Some("config") => {
-                <script>System.import('models/config/loader');</script>
-            }
-            case _ => {}
-        }
+        <script>System.import('main');</script>
     </head>
-    <body class="is-authed">
+    <body class="is-authed" data-bind="css: {pending: pending}">
 
     @if(Switches.ToolDisable.isSwitchedOn) {
         <span class="message message--important">Temporarily disabled. Please try again shortly.</span>
     } else {
-        <header>
-            <a href="/" target="_top">
-                <img class="logo" src="@controllers.faciatool.routes.UncachedAssets.at("images/edit-pen.png")" />
-                <h1>
-                    <span data-bind="text: title()">fronts</span>
-                    @if(Play.isDev && Configuration.facia.stage.toLowerCase != "dev") { : @Configuration.facia.stage }
-                </h1>
-            </a>
-                <div class="log-in-out top-button"><a href="/logout">Logout</a></div>
-                <div class="top-button-collections" data-bind="if: !!$data.layout">
-                    <!-- ko if: layout.configVisible() -->
-                    <div class="save-layout top-button"><a data-bind="click: saveLayout">Save</a></div>
-                    <div class="cancel-layout top-button"><a data-bind="click: cancelLayout">Cancel</a></div>
-                    <!-- /ko -->
-                    <!-- ko ifnot: layout.configVisible() -->
-                    <div class="choose-layout top-button"><a data-bind="click: chooseLayout">Workspace</a></div>
-                    <!-- /ko -->
-                </div>
-            }
-        </header>
+
+        @templates.header(Configuration.facia.stage)
+        @templates.vertical_layout()
+        @templates.main()
 
         @content
+
     </body>
 </html>

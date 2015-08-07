@@ -1,8 +1,10 @@
 import Promise from 'Promise';
+import ko from 'knockout';
 import persistence from 'models/config/persistence';
 import Front from 'models/config/front';
 import Collection from 'models/config/collection';
 import * as ajax from 'modules/authed-ajax';
+import * as vars from 'modules/vars';
 
 describe('Persistence', function () {
     beforeEach(function () {
@@ -17,8 +19,11 @@ describe('Persistence', function () {
         spyOn(ajax, 'request').and.callFake(function () {
             return new Promise(resolve => setTimeout(resolve, 10));
         });
-        persistence.on('before update', events.before);
-        persistence.on('after update', events.after);
+        persistence.on('update:before', events.before);
+        persistence.on('update:after', events.after);
+        vars.setModel({
+            frontsList: ko.observableArray()
+        });
     });
 
     it('creates a front', function (done) {

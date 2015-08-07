@@ -1,5 +1,7 @@
 import ko from 'knockout';
+import _ from 'underscore';
 import Promise from 'Promise';
+import * as vars from 'modules/vars';
 import {register} from 'models/widgets';
 import * as wait from 'test/utils/wait';
 
@@ -18,11 +20,19 @@ export default function (html) {
         container,
         apply: (model, waitWidget) => {
             return new Promise(resolve => {
+                _.defaults(model, {
+                    testColumn: { registerMainWidget: () => {}},
+                    identity: { email: 'someone@theguardian.com' },
+                    isPasteActive: ko.observable(),
+                    frontsList: ko.observableArray()
+                });
+
                 if (waitWidget) {
                     wait.event('widget:load').then(resolve);
                 } else {
                     setTimeout(resolve, 10);
                 }
+                vars.setModel(model);
                 ko.applyBindings(model, container);
             });
         },

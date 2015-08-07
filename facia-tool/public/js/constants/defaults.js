@@ -82,6 +82,10 @@ export default {
         ].join(',')
     ].join('&'),
 
+    draggableTypes: {
+        configCollection: 'config-collection'
+    },
+
 
     frontendApiBase:       '/frontend',
 

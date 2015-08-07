@@ -15,8 +15,9 @@ export default class BaseClass extends EventEmitter {
     }
 
     listenOn(emitter, event, callback) {
-        this[listeners].push({ emitter, event, callback });
-        emitter.on(event, callback);
+        var fn = callback.bind(this);
+        this[listeners].push({ emitter, event, fn });
+        emitter.on(event, fn);
     }
 
     dispose() {

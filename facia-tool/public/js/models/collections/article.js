@@ -64,6 +64,7 @@ define([
         validateImageSrc = validateImageSrc.default;
         copiedArticle = copiedArticle.default;
         logger = logger.default;
+        Group = Group.default;
 
         var capiProps = [
                 'webUrl',
@@ -345,6 +346,7 @@ define([
 
             opts = opts || {};
 
+            this.dropTarget = true;
             this.id = ko.observable(opts.id);
 
             this.group = opts.group;
@@ -672,7 +674,7 @@ define([
             ].filter(function(prop) {return !deepGet(opts, prop); });
 
             if (missingProps.length) {
-                vars.model.alert('ContentApi is returning invalid data. Fronts may not update.');
+                mediator.emit('capi:error', 'ContentApi is returning invalid data. Fronts may not update.');
                 logger.error('ContentApi missing: "' + missingProps.join('", "') + '" for ' + this.id());
             } else {
                 this.state.isLoaded(true);
@@ -710,6 +712,13 @@ define([
             return {
                 id:   this.id(),
                 meta: this.getMeta()
+            };
+        };
+
+        Article.prototype.normalizeDropTarget = function() {
+            return {
+                isAfter: false,
+                target: this
             };
         };
 
@@ -905,6 +914,10 @@ define([
             this.close();
             this.save();
             return false;
+        };
+
+        Article.prototype.omitItem = function () {
+            this.group.omitItem(this);
         };
 
         Article.prototype.drop = function (source, targetGroup, alternateAction) {

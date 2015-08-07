@@ -1,13 +1,14 @@
 import ko from 'knockout';
 import _ from 'underscore';
 import $ from 'jquery';
-import mockjax from 'test/utils/mockjax';
 import * as cache from 'modules/cache';
+import * as droppable from 'modules/droppable';
 import * as vars from 'modules/vars';
-import newItems from 'models/collections/new-items';
 import * as widgets from 'models/widgets';
-import listManager from 'modules/list-manager';
 import mediator from 'utils/mediator';
+import mockjax from 'test/utils/mockjax';
+import textInside from 'test/utils/text-inside';
+import inject from 'test/utils/inject';
 
 // Store the original settimeout
 var yeld = setTimeout;
@@ -93,40 +94,26 @@ describe('Clipboard', function () {
     });
 });
 
-var container;
+var injectedClipboard;
 function injectClipboard (callback) {
-    if (container) {
-        ko.cleanNode(container[0]);
-        container.remove();
+    if (injectedClipboard) {
+        injectedClipboard.dispose();
         jasmine.clock().tick(10);
     }
 
-    container = $([
-        '<div>',
-            '<clipboard-widget params="position: 0, column: $data"></clipboard-widget>',
-        '</div>',
-        '<script type="text/html" id="template_article">',
-            '<div class="article" data-bind="text: headline"></div>',
-        '</script>'
-    ].join('')).appendTo(document.body);
+    injectedClipboard = inject(`
+        <clipboard-widget params="position: 0, column: $data"></clipboard-widget>
+    `);
+    injectedClipboard.apply(vars.model, true).then(callback);
 
-    mediator.once('clipboard:loaded', function (clipboard) {
-        yeld(function () {
-            callback(clipboard);
-        }, 10);
-    });
-
-    ko.applyBindings({
-        isPasteActive: false
-    }, container[0]);
     jasmine.clock().tick(10);
 }
 
 function getArticles () {
     var articles = [];
-    $('.article').each(function (i, elem) {
+    $('trail-widget').each(function (i, elem) {
         articles.push({
-            headline: $(elem).text().trim(),
+            headline: textInside($(elem).find('.element__headline')),
             dom: $(elem)
         });
     });
@@ -134,9 +121,10 @@ function getArticles () {
 }
 
 function dragArticle (article, clipboard, callback) {
-    clipboard.group.drop({
+    mediator.emit('drop', {
         sourceItem: article,
-    }, clipboard.group);
+        sourceGroup: null
+    }, clipboard.group, clipboard.group);
     // Let knockout refresh the HTML
     yeld(function () {
         jasmine.clock().tick(vars.CONST.detectPendingChangesInClipboard);
@@ -164,8 +152,8 @@ function changeHeadline (position, newHeadline, clipboard) {
 var mockjaxId;
 function setUpTests () {
     window.localStorage.clear();
+    droppable.init();
     widgets.register();
-    listManager.init(newItems);
     cache.put('contentApi', 'internal-code/page/first', {
         'webUrl': 'http://theguardian.com/banana',
         'fields': {
@@ -176,7 +164,9 @@ function setUpTests () {
         vars.setModel({
             switches: ko.observable({
                 'facia-tool-sparklines': false
-            })
+            }),
+            identity: { email: 'fabio.crisci@theguardian.com' },
+            isPasteActive: ko.observable()
         });
     }
     mockjaxId = mockjax({
@@ -186,8 +176,7 @@ function setUpTests () {
 }
 
 function clearTests () {
-    listManager.reset();
-    ko.cleanNode(container[0]);
-    container.remove();
+    droppable.dispose();
+    injectedClipboard.dispose();
     mockjax.clear(mockjaxId);
 }

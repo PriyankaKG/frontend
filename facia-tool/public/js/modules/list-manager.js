@@ -1,46 +1,34 @@
-define([
-    'underscore',
-    'modules/vars',
-    'utils/alert',
-    'utils/mediator',
-    'utils/url-abs-path',
-    'utils/remove-by-id'
-], function(
-    _,
-    vars,
-    alert,
-    mediator,
-    urlAbsPath,
-    removeById
-) {
-    alert = alert.default;
-    urlAbsPath = urlAbsPath.default;
-    removeById = removeById.default;
-    mediator = mediator.default;
+import _ from 'underscore';
+import {CONST} from 'modules/vars';
+import mediator from 'utils/mediator';
+import alert from 'utils/alert';
+import urlAbsPath from 'utils/url-abs-path';
+import removeById from 'utils/remove-by-id';
 
-    var alreadyInitialised = false,
-        listeners = mediator.scope();
+function alertBadContent(msg) {
+    alert(msg ? msg : 'Sorry, but you can\'t add that item');
+}
 
-    function alertBadContent(msg) {
-        alert(msg ? msg : 'Sorry, but you can\'t add that item');
+export default class ListManager {
+    constructor(newItems) {
+        var listeners = mediator.scope();
+        listeners.on('collection:updates', (opts) => {
+
+            var options = _.extend({}, opts, newItems);
+            if (opts.alternateAction) {
+                this.alternateAction(options);
+            } else {
+                this.listManager(options);
+            }
+        });
+        this.listeners = listeners;
     }
 
-    /* opts:
-        newItemsConstructor
-        newItemsValidator
-        newItemsPersister
+    dispose() {
+        this.listeners.dispose();
+    }
 
-        sourceItem
-        sourceGroup (optional)
-
-        targetItem (optional)
-        targetGroup
-
-        isAfter (optional)
-
-        mediaItem (optional)
-    */
-    function listManager(opts) {
+    listManager(opts) {
         var position,
             newItems,
             insertAt;
@@ -71,22 +59,22 @@ define([
         opts.targetGroup.items.splice(insertAt, 0, newItems[0]);
 
         opts.newItemsValidator(newItems, opts.targetContext)
-        .then(function() {
+        .fail(function(err) {
+            _.each(newItems, function(item) { opts.targetGroup.items.remove(item); });
+            alertBadContent(err);
+        })
+        .done(function() {
             if (opts.targetGroup.parent) {
                 opts.newItemsPersister(newItems, opts.sourceContext, opts.sourceGroup, opts.targetContext, opts.targetGroup, position, opts.isAfter);
             }
-        })
-        .catch(function(err) {
-            _.each(newItems, function(item) { opts.targetGroup.items.remove(item); });
-            alertBadContent(err.message);
         });
     }
 
-    function alternateAction (opts) {
+    alternateAction(opts) {
         if (opts.targetGroup.parentType === 'Article') {
             var id = urlAbsPath(opts.sourceItem.id);
 
-            if (id.indexOf(vars.CONST.internalContentPrefix) !== 0) {
+            if (id.indexOf(CONST.internalContentPrefix) !== 0) {
                 return;
             }
 
@@ -100,26 +88,4 @@ define([
             opts.mergeItems(newItems[0], opts.targetGroup.parent, opts.targetContext);
         }
     }
-
-    return {
-        init: function(newItems) {
-            if (alreadyInitialised) {
-                return;
-            }
-            alreadyInitialised = true;
-
-            listeners.on('collection:updates', function(opts) {
-                var options = _.extend(opts, newItems);
-                if (opts.alternateAction) {
-                    alternateAction(options);
-                } else {
-                    listManager(options);
-                }
-            });
-        },
-        reset: function () {
-            listeners.dispose();
-            alreadyInitialised = false;
-        }
-    };
-});
+}

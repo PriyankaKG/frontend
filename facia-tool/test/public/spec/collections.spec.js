@@ -6,9 +6,6 @@ import editAction from 'test/utils/edit-actions';
 import publishAction from 'test/utils/publish-actions';
 import * as dom from 'test/utils/dom-nodes';
 import * as wait from 'test/utils/wait';
-import ko from 'knockout';
-import listManager from 'modules/list-manager';
-import mediator from 'utils/mediator';
 
 describe('Collections', function () {
     beforeEach(function () {
@@ -17,10 +14,7 @@ describe('Collections', function () {
     });
     afterEach(function () {
         this.testInstance.dispose();
-        ko.cleanNode(window.document.body);
         this.mockVisible.dispose();
-        mediator.removeAllListeners();
-        listManager.reset();
     });
 
     it('displays the correct timing', function (done) {

@@ -3,7 +3,7 @@ import * as ajax from 'modules/authed-ajax';
 import * as mockjax from 'test/utils/mockjax';
 import $ from 'jquery';
 import * as panda from 'panda-session';
-import * as vars from 'modules/vars';
+import {CONST} from 'modules/vars';
 
 describe('Authed Ajax', function () {
     beforeEach(function () {
@@ -162,7 +162,7 @@ describe('Collections update', function () {
         beforeEach(function () {
             this.scope = mockjax.scope();
             this.scope({
-                url: vars.CONST.apiBase + '/edits',
+                url: CONST.apiBase + '/edits',
                 status: 200,
                 responseText: {
                     'banana': {
@@ -173,7 +173,7 @@ describe('Collections update', function () {
                     }
                 }
             }, {
-                url: vars.CONST.apiBase + '/treats/banana',
+                url: CONST.apiBase + '/treats/banana',
                 status: 200,
                 responseText: {
                     'banana': {
@@ -206,7 +206,7 @@ describe('Collections update', function () {
             })
             .then(() => {
                 var call = $.ajax.calls.argsFor(0)[0], data = JSON.parse(call.data);
-                expect(call.url).toBe(vars.CONST.apiBase + '/edits');
+                expect(call.url).toBe(CONST.apiBase + '/edits');
                 expect(call.type).toBe('POST');
                 expect(data).toEqual({
                     type: 'Update',
@@ -239,7 +239,7 @@ describe('Collections update', function () {
             })
             .then(() => {
                 var call = $.ajax.calls.argsFor(0)[0], data = JSON.parse(call.data);
-                expect(call.url).toBe(vars.CONST.apiBase + '/treats/banana');
+                expect(call.url).toBe(CONST.apiBase + '/treats/banana');
                 expect(call.type).toBe('POST');
                 expect(data).toEqual({
                     type: 'Remove',
@@ -282,7 +282,7 @@ describe('Collections update', function () {
             })
             .then(() => {
                 var call = $.ajax.calls.argsFor(0)[0], data = JSON.parse(call.data);
-                expect(call.url).toBe(vars.CONST.apiBase + '/edits');
+                expect(call.url).toBe(CONST.apiBase + '/edits');
                 expect(call.type).toBe('POST');
                 expect(data).toEqual({
                     type: 'UpdateAndRemove',
@@ -312,7 +312,7 @@ describe('Collections update', function () {
         beforeEach(function () {
             this.scope = mockjax.scope();
             this.scope({
-                url: vars.CONST.apiBase + '/edits',
+                url: CONST.apiBase + '/edits',
                 status: 500,
                 responseText: {}
             });

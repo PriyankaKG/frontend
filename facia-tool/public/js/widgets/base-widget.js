@@ -1,6 +1,6 @@
 import Promise from 'Promise';
+import BaseClass from 'models/base-class';
 import mediator from 'utils/mediator';
-import BaseClass from 'modules/class';
 
 class BaseWidget extends BaseClass {
     constructor() {
